@@ -5,8 +5,8 @@
 - Make sure you can run python scripts
 ##
 ### 2. Package installation
-- run `pip3 install yfinance pandas datetime flask` to install python scripts dependencies
-- run `npm install` to install node app dependencies
+- in [scripts](src%2Fdata2Fscripts) directory, run `pip3 install yfinance pandas datetime flask` to install python scripts dependencies
+- in project root, run `npm install` to install node app dependencies
 ## 
 ### 3. Run and use the app
 - run [historical_data_acqusition_yfinance.py](src%2Fdata%2Fscripts%2Fhistorical_data_acqusition_yfinance.py)
