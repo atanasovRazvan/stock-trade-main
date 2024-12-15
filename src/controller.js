@@ -1,6 +1,6 @@
 // Import necessary modules
 const express = require('express');
-const generateStockData = require('./data/historical');
+const fetchHistoricalData = require('./data/historical');
 const generateStockForecast = require('./data/forecast');
 
 // Initialize Express application
@@ -10,9 +10,10 @@ const app = express();
 const baseURL = '/api';
 
 // Historical API: GET "/historical"
-app.get(`${baseURL}/history`, (req, res) => {
+app.get(`${baseURL}/history`, async (req, res) => {
     try {
-        const data = generateStockData();
+        // const data = generateHistoricalData();
+        const data = await fetchHistoricalData();
         res.json({
             success: true,
             data
