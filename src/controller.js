@@ -28,7 +28,7 @@ app.get(`${baseURL}/history`, async (req, res) => {
 });
 
 // Forecast API: GET "/forecast"
-app.get(`${baseURL}/forecast`, (req, res) => {
+app.get(`${baseURL}/forecast`, async (req, res) => {
     try {
         const data = generateStockForecast();
         res.json({
@@ -43,5 +43,32 @@ app.get(`${baseURL}/forecast`, (req, res) => {
         });
     }
 });
+
+
+// Playing with Grafana
+app.get(`${baseURL}/combined`, async (req, res) => {
+    try {
+        const historicalData =  await fetchHistoricalData();
+        const forecastedData = generateStockForecast();
+        const combined = [
+            ...historicalData.map(({timestamp, open, company}) =>
+                ({timestamp, open, company, type: "history"})
+            ),
+            ...forecastedData.map(({timestamp, open, company}) =>
+                ({timestamp, open, company, type: "forecast"})
+            )
+        ]
+        res.json({
+            success: true,
+            data: combined,
+        });
+    } catch (error) {
+    res.status(500).json({
+        success: false,
+        message: 'Failed to fetch forecast data',
+        error: error.message
+    });
+}
+})
 
 module.exports = app;
