@@ -2,6 +2,7 @@
 const express = require('express');
 const fetchHistoricalData = require('./data/historical');
 const generateStockForecast = require('./data/forecast');
+const { fetchRealTimeData } = require('./data/finnhub');
 
 // Initialize Express application
 const app = express();
@@ -40,6 +41,23 @@ app.get(`${baseURL}/forecast`, async (req, res) => {
             success: false,
             message: 'Failed to fetch forecast data',
             error: error.message
+        });
+    }
+});
+
+// Real-time API for SKX and NKE
+app.get(`${baseURL}/real-time`, async (req, res) => {
+    try {
+        const data = await fetchRealTimeData(['SKX', 'NKE']);
+        res.json({
+            success: true,
+            data,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch real-time data',
+            error: error.message,
         });
     }
 });

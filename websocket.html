@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Client</title>
+</head>
+<body>
+    <h1>WebSocket Test Client</h1>
+    <div id="status">Connecting...</div>
+    <ul id="messages"></ul>
+
+    <script>
+        // Connect to WebSocket server
+        const socket = new WebSocket('ws://localhost:8080');
+
+        // Update status when connected
+        socket.onopen = () => {
+            document.getElementById('status').textContent = 'Connected to WebSocket server';
+            console.log('WebSocket connection established.');
+        };
+
+        // Handle incoming messages
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data); // Assuming server sends JSON
+            const messagesList = document.getElementById('messages');
+            const newMessage = document.createElement('li');
+            newMessage.textContent = `Received: ${JSON.stringify(data)}`;
+            messagesList.appendChild(newMessage);
+            console.log('Message received:', data);
+        };
+
+        // Handle connection errors
+        socket.onerror = (error) => {
+            document.getElementById('status').textContent = 'WebSocket Error';
+            console.error('WebSocket error:', error);
+        };
+
+        // Handle connection closure
+        socket.onclose = () => {
+            document.getElementById('status').textContent = 'WebSocket connection closed';
+            console.log('WebSocket connection closed.');
+        };
+    </script>
+</body>
+</html>
