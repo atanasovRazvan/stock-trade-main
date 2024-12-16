@@ -13,4 +13,8 @@
 - run node server by using `npm run start`
 - get historical data with GET `localhost:3000/api/history`
 - get forecasted data with GET `localhost:3000/api/forecast`
-- listen to WebSocket for real-time (TODO)
+- get real-time data with GET `localhost:3000/api/real-time`
+##
+### 4. Test Websocket connection in browser
+- run https server in root directiory: `npx http-server`
+- test websocket connection with GET `http://localhost:8081/websocket.html`
