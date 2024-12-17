@@ -5,6 +5,8 @@ const generateStockForecast = require('./data/forecast');
 
 // Initialize Express application
 const app = express();
+const cors = require("cors");
+app.use(cors());
 
 // Base URL
 const baseURL = '/api';
