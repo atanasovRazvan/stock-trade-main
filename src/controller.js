@@ -1,7 +1,7 @@
 // Import necessary modules
 const express = require('express');
 const fetchHistoricalData = require('./data/historical');
-const generateStockForecast = require('./data/forecast');
+const getForecastData = require('./data/forecast');
 
 // Initialize Express application
 const app = express();
@@ -29,24 +29,6 @@ app.get(`${baseURL}/history`, async (req, res) => {
     }
 });
 
-// Forecast API: GET "/forecast"
-app.get(`${baseURL}/forecast`, async (req, res) => {
-    try {
-        const data = generateStockForecast();
-        res.json({
-            success: true,
-            data
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch forecast data',
-            error: error.message
-        });
-    }
-});
-
-
 // Playing with Grafana
 app.get(`${baseURL}/combined`, async (req, res) => {
     try {
@@ -72,5 +54,41 @@ app.get(`${baseURL}/combined`, async (req, res) => {
     });
 }
 })
+
+// Forecast API: GET "/forecast"
+app.get(`${baseURL}/forecast`, (req, res) => {
+    try {
+        const data = getForecastData();
+        res.json({
+            success: true,
+            data
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch forecast data',
+            error: error.message
+        });
+    }
+});
+
+// Trigger LSTM forecast and update
+app.get(`${baseURL}/forecast/update`, (req, res) => {
+    exec('python3 src/data/scripts/lstm_forecast.py', (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Error running LSTM script: ${error.message}`);
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to update forecast data',
+                error: error.message
+            });
+        }
+        console.log('LSTM script output:', stdout);
+        res.json({
+            success: true,
+            message: 'Forecast data updated successfully.'
+        });
+    });
+});
 
 module.exports = app;
