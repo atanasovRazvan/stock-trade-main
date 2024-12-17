@@ -8,7 +8,7 @@ async function fetchHistoricalData() {
         // The data from the Python service
         const data = response.data;
 
-        console.log('Historical Data retrieved:', data);
+        console.log('Historical Data retrieved');
 
         // Use the data as needed
         return data;
