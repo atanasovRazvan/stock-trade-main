@@ -13,11 +13,11 @@ historical_data = response.json()['data']
 # Process data for NIKE and SKECHERS
 def prepare_data(company, historical_data):
     df = pd.DataFrame([x for x in historical_data if x['company'] == company])
-    df = df[['timestamp', 'open']].sort_values('timestamp')
+    df = df[['timestamp', 'open', 'close', 'high', 'low']].sort_values('timestamp')
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df = df.set_index('timestamp')
     scaler = MinMaxScaler(feature_range=(0, 1))
-    scaled_data = scaler.fit_transform(df[['open']])
+    scaled_data = scaler.fit_transform(df)
     return df, scaled_data, scaler
 
 # Sequence generator
@@ -36,7 +36,7 @@ def build_lstm_model(input_shape):
         LSTM(50, return_sequences=False),
         Dropout(0.2),
         Dense(25),
-        Dense(1)
+        Dense(input_shape[1])  # Predict multiple features: open, close, high, low
     ])
     model.compile(optimizer='adam', loss='mean_squared_error')
     return model
@@ -44,23 +44,33 @@ def build_lstm_model(input_shape):
 # Forecast function
 def forecast_stock(company, historical_data, seq_length=60, future_days=60):
     df, scaled_data, scaler = prepare_data(company, historical_data)
-    x, _ = create_sequences(scaled_data, seq_length)
+    x, y = create_sequences(scaled_data, seq_length)
     model = build_lstm_model((x.shape[1], x.shape[2]))
-    model.fit(x, x[:, -1, 0], epochs=10, batch_size=32, verbose=1)
-    
+    model.fit(x, y, epochs=20, batch_size=32, verbose=1)
+
     # Forecast
     predictions = []
     current_sequence = scaled_data[-seq_length:].tolist()
     for _ in range(future_days):
         next_step = model.predict(np.array([current_sequence]), verbose=0)
-        predictions.append(next_step[0, 0])
-        current_sequence.append([next_step[0, 0]])
+        predictions.append(next_step[0])
+        current_sequence.append(next_step[0])
         current_sequence.pop(0)
 
     # Inverse scale predictions
     forecast_dates = pd.date_range(df.index[-1] + pd.Timedelta(days=1), periods=future_days)
-    forecasted_prices = scaler.inverse_transform(np.array(predictions).reshape(-1, 1))
-    forecast = [{'timestamp': str(forecast_dates[i]), 'company': company, 'open': float(forecasted_prices[i][0])} for i in range(future_days)]
+    forecasted_prices = scaler.inverse_transform(predictions)
+    forecast = [
+        {
+            'timestamp': str(forecast_dates[i]),
+            'company': company,
+            'open': float(forecasted_prices[i][0]),
+            'close': float(forecasted_prices[i][1]),
+            'high': float(forecasted_prices[i][2]),
+            'low': float(forecasted_prices[i][3])
+        }
+        for i in range(future_days)
+    ]
     return forecast
 
 # Run forecasts

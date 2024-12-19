@@ -3,7 +3,8 @@ const app = require('./src/controller'); // Import the controller
 const WebSocket = require('ws');
 
 // Finnhub WebSocket URL and token
-FINNHUB_TOKEN = 'ct9m1vpr01quh43od6sgct9m1vpr01quh43od6t0';
+// DO NOT COMMIT TOKEN
+FINNHUB_TOKEN = 'YOUR_TOKEN_HERE';
 
 const FINNHUB_WS_URL = `wss://ws.finnhub.io?token=${FINNHUB_TOKEN}`;
 const TARGET_SYMBOLS = ['NKE', 'SKX'];
