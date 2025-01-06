@@ -81,7 +81,10 @@ const App = () => {
         return data.filter((entry) => {
             const entryTime = new Date(entry.timestamp);
             if (timeFilter === "YEAR") return entryTime.getFullYear() === now.getFullYear();
-            if (timeFilter === "MONTH") return entryTime.getMonth() === now.getMonth();
+            if (timeFilter === "MONTH") return (
+                entryTime.getMonth() === now.getMonth() &&
+                entryTime.getFullYear() === now.getFullYear()
+            );
             if (timeFilter === "WEEK") {
                 const oneWeekAgo = new Date(now);
                 oneWeekAgo.setDate(now.getDate() - 7);
@@ -267,11 +270,31 @@ const renderDashboard = (data, forecast) => {
             <div style={{ display: "flex", gap: "20px", alignItems: "center", height: "100%" }}>
                 <div style={{ flex: 4, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                     <h3 style={{ textAlign: "center", marginBottom: "10px", color: "#333" }}>Nike Prices Over Time</h3>
-                    <Line data={stackedAreaChartData(nikeData, nikeForecast, "rgba(75, 192, 192, 0.3)", "rgba(75, 192, 192, 1)")} />
-                </div>
+                    <Line data={stackedAreaChartData(nikeData, nikeForecast, "rgba(75, 192, 192, 0.3)", "rgba(75, 192, 192, 1)")}
+                        options={{
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true, 
+                                    min: 0,
+                                },
+                            },
+                        }} 
+                    />   
+                </div> 
                 <div style={{ flex: 4, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                     <h3 style={{ textAlign: "center", marginBottom: "10px", color: "#333" }}>Skechers Prices Over Time</h3>
-                    <Line data={stackedAreaChartData(skechersData, skechersForecast, "rgba(128, 75, 192, 0.3)", "rgba(128, 75, 192, 1)")} />
+                    <Line data={stackedAreaChartData(skechersData, skechersForecast, "rgba(128, 75, 192, 0.3)", "rgba(128, 75, 192, 1)")} 
+                        options={{
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true, 
+                                    min: 0,
+                                },
+                            },
+                        }} 
+                    />
                 </div>
                 <div style={{ flex: 2, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                     <p>
