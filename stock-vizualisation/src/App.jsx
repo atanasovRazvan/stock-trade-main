@@ -200,8 +200,26 @@ const App = () => {
             ],
         };
         
-        
-        
+
+        function unixToDate(timestamp) {
+            const date = new Date(timestamp);
+
+            const milliseconds = String(timestamp % 1000).padStart(3, '0'); 
+            const seconds = String(Math.floor(timestamp / 1000) % 60).padStart(2, '0'); 
+            const minutes = String(Math.floor(timestamp / 60000) % 60).padStart(2, '0'); 
+            const hours = String(Math.floor(timestamp / 3600000) % 24).padStart(2, '0'); 
+            const days = Math.floor(timestamp / 86400000); 
+
+            const months = date.getMonth() + 1; 
+            const years = date.getFullYear();
+            const day = String(date.getDate()).padStart(2, '0'); 
+            const month = String(months).padStart(2, '0');
+            const year = years; 
+
+            return `${milliseconds}-${seconds}-${minutes}-${hours}-${day}-${month}-${year}`;
+
+        }
+          
 
         const stackedAreaChartData = (companyData, forecastData, color, borderColor) => ({
             datasets: [
@@ -227,7 +245,31 @@ const App = () => {
             ],
         });
 
-        return { lineChartData, barChartData, nikeData, skechersData, nikeForecast, skechersForecast, stackedAreaChartData };
+        const stackedAreaChartRealData = (companyData, forecastData, color, borderColor) => ({
+            datasets: [
+                {
+                    label: "Actual",
+                    data: companyData.map((d) => ({ x: unixToDate(d.timestamp), y: d[priceType] })),
+                    backgroundColor: color,
+                    borderColor: borderColor,
+                    borderWidth: 2,
+                    fill: true,
+                    pointRadius: 0,
+                },
+                // {
+                //     label: "Forecast",
+                //     data: forecastData.map((d) => ({ x: formatDate(d.timestamp), y: d[priceType] })),
+                //     backgroundColor: color,
+                //     borderColor: "rgba(0, 0, 0, 0.5)",
+                //     borderWidth: 1,
+                //     borderDash: [5, 5],
+                //     fill: true,
+                //     pointRadius: 0,
+                // },
+            ],
+        });
+
+        return { lineChartData, barChartData, nikeData, skechersData, nikeForecast, skechersForecast, stackedAreaChartData, stackedAreaChartRealData };
     };
 
 const renderDashboard = (data, forecast) => {
@@ -312,6 +354,96 @@ const renderDashboard = (data, forecast) => {
         </div>
     );
 };
+
+const renderRealDashboard = (data, forecast) => {
+    const {  nikeData, skechersData, nikeForecast, skechersForecast, stackedAreaChartRealData } = getChartData(data, forecast);
+
+    return (
+        <div style={{ display: "grid"}}>
+            {/* <div style={{ display: "flex", gap: "20px", alignItems: "center", height: "100%" }}>
+                <div style={{ flex: 5, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                    <h3 style={{ textAlign: "center", marginBottom: "10px", color: "#333" }}>Nike vs. Skechers: Stock Prices Over Time</h3>
+                    <Line data={lineChartData} />
+                </div>
+                <div style={{ flex: 5, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                    <h3 style={{ textAlign: "center", marginBottom: "10px", color: "#333" }}>Nike vs. Skechers: Latest Stock Prices</h3>
+                    <Bar
+                        data={barChartData}
+                        options={{
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: "top",
+                                    labels: {
+                                        usePointStyle: true,
+                                    },
+                                },
+                            },
+                            responsive: true,
+                            scales: {
+                                x: {
+                                    stacked: false,
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                },
+                            },
+                        }}
+                    />
+                </div>
+            </div> */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "row", justifyContent: "center",}}>
+                <div style={{ textAlign: "center", margin: 0 }}>
+                    <p style={{ marginRight: 50 }}>
+                        <span style={{ fontSize: "1.2em", fontWeight: "bold", color: "#333" }}>Current Average Nike Price</span>
+                        <br />
+                        <span style={{ fontSize: "4em", color: "#333" }}>${calculateAverage(data, "NIKE")}</span>
+                    </p>
+                </div>
+                <div style={{ textAlign: "center", margin: 0 }}>
+                    <p style={{ marginLeft: 50}}>
+                        <span style={{ fontSize: "1.2em", fontWeight: "bold", color: "#333" }}>Current Average Skechers Price</span>
+                        <br />
+                        <span style={{ fontSize: "4em", color: "#333" }}>${calculateAverage(data, "SKECHERS")}</span>
+                    </p>
+                </div>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                    <h3 style={{ textAlign: "center", marginBottom: "10px", color: "#333" }}>Nike Prices Over Time</h3>
+                    <Line data={stackedAreaChartRealData(nikeData, nikeForecast, "rgba(75, 192, 192, 0.3)", "rgba(75, 192, 192, 1)")}
+                        options={{
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true, 
+                                    min: 0,
+                                },
+                            },
+                        }} 
+                    />   
+                </div> 
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                    <h3 style={{ textAlign: "center", marginBottom: "10px", color: "#333" }}>Skechers Prices Over Time</h3>
+                    <Line data={stackedAreaChartRealData(skechersData, skechersForecast, "rgba(128, 75, 192, 0.3)", "rgba(128, 75, 192, 1)")} 
+                        options={{
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true, 
+                                    min: 0,
+                                },
+                            },
+                        }} 
+                    />
+                </div>
+            </div>
+            </div>
+        
+    );
+};
+
     return (
         <div style={{ padding: "20px", color: "#333" }}>
     <h1>Stock Visualization Dashboard</h1>
@@ -407,7 +539,7 @@ const renderDashboard = (data, forecast) => {
             </select>
         </div>
     </div>
-    {renderDashboard(realtimeData, forecastData)}
+    {renderRealDashboard(realtimeData, forecastData)}
 </TabPanel>
 
     </Tabs>
